@@ -63,21 +63,18 @@ add_executable(${PROJECT_NAME}
   src/common/common.hpp
 
   src/visitor/visitor.cpp
-  src/visitor/visitor.h
+  src/visitor/visitor.hpp
 
-  src/consumer/consumer.h
+  src/consumer/consumer.hpp
   src/consumer/consumer.cpp
 
   src/frontendAction/structFrontendAction.cpp
-  src/frontendAction/structFrontendAction.h
+  src/frontendAction/structFrontendAction.hpp
 )
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/consumer
-    ${CMAKE_SOURCE_DIR}/src/visitor
-    ${CMAKE_SOURCE_DIR}/src/frontendAction
     ${CLANG_INCLUDE_DIRS}
 )
 target_link_directories(${PROJECT_NAME} 

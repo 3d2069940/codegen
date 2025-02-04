@@ -1,4 +1,6 @@
 //----------------------------------------------------------------------------
+#include <deque>
+//----------------------------------------------------------------------------
 #include <clang/AST/Comment.h>
 #include <clang/AST/Decl.h>
 #include <clang/AST/Expr.h>
@@ -6,11 +8,10 @@
 //----------------------------------------------------------------------------
 #include <llvm/Support/raw_ostream.h>
 //----------------------------------------------------------------------------
-#include "visitor.h"
+#include "visitor.hpp"
 //----------------------------------------------------------------------------
-Visitor::Visitor(clang::ASTContext * context, std::shared_ptr<clang::Preprocessor> preProc) :
-  context_(context),
-  preProc_(preProc)
+Visitor::Visitor(clang::ASTContext * context) :
+  context_(context)
 {
 }
 //----------------------------------------------------------------------------
@@ -23,23 +24,26 @@ bool Visitor::VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl)
   if (checkForGenFlags(recordDecl->decls_begin(), recordDecl->decls_end(), genFlagsID) == false)
     return true;
 
+  getQualifiedNameWithTemplates(recordDecl->getDeclContext());
+  RecordInfo    rInfo;
   decl_iterator declIt = recordDecl->decls_begin();
   for (std::size_t i = 0; ; ++i)
   {
+    FieldInfo fInfo;
     if (declIt == recordDecl->decls_end())
       break;
     if (i == genFlagsID)
     {
       auto * varDecl = clang::cast<clang::VarDecl>(*declIt);
       assert(varDecl != nullptr);
-      processGenFlags(varDecl);
+      processGenFlags(varDecl, rInfo.genFlags_);
     }
     else if (clang::isa<clang::FieldDecl>(*declIt))
     {
-      FieldInfo fInfo;
       auto * fieldDecl = clang::cast<clang::FieldDecl>(*declIt);
       assert(fieldDecl != nullptr);
       processRecordField(fieldDecl, fInfo);
+      rInfo.fields_.emplace_back(std::move(fInfo));
     } 
     declIt++;
   }
@@ -63,7 +67,53 @@ bool Visitor::checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t
   });
 }
 //----------------------------------------------------------------------------
-void Visitor::processGenFlags(clang::VarDecl * decl)
+void Visitor::getQualifiedNameWithTemplates(clang::DeclContext * context) const
+{
+  if (context == nullptr)
+    return;
+
+  std::deque<std::string> qualifiedName;
+  while (context)
+  {
+    if (clang::isa<clang::NamespaceDecl>(context))
+    {
+      const auto * namespaceDecl = clang::cast<clang::NamespaceDecl>(context);
+      qualifiedName.push_front(namespaceDecl->getNameAsString());
+    }
+    else if (clang::isa<clang::CXXRecordDecl>(context))
+    {
+      const auto * cxxRecordDecl = clang::cast<clang::CXXRecordDecl>(context);
+      const auto * templateDecl  = cxxRecordDecl->getDescribedClassTemplate();
+      const auto * templateParams = templateDecl->getTemplateParameters();
+      std::string templateStr = "template<";
+      for (size_t i = 0; i < templateParams->size(); ++i)
+      {
+        if (i > 0)
+          templateStr += ", ";
+        templateStr += templateParams->getParam(i)->getNameAsString();
+      }
+      qualifiedName.push_front(cxxRecordDecl->getNameAsString());
+      qualifiedName.push_front(templateStr + ">");
+    }
+    else if (clang::isa<clang::TemplateDecl>(context))
+    {
+      std::string templateStr;
+      const auto * templateDecl = clang::cast<clang::TemplateDecl>(context);
+      const auto * templateParams = templateDecl->getTemplateParameters();
+      for (size_t i = 0; i < templateParams->size(); ++i)
+      {
+        if (i > 0)
+          templateStr += ", ";
+        templateStr += templateParams->getParam(i)->getNameAsString();
+      }
+      qualifiedName.push_front(templateDecl->getNameAsString());
+      qualifiedName.push_front(templateStr);    
+    }
+    context = context->getParent();
+  }
+}
+//----------------------------------------------------------------------------
+void Visitor::processGenFlags(clang::VarDecl * decl, GenFlags & gFlags) const
 {
   clang::QualType varType = decl->getType();
 
@@ -89,14 +139,19 @@ void Visitor::processGenFlags(clang::VarDecl * decl)
     if (arg.getKind() == clang::TemplateArgument::Integral)
     {
       llvm::APInt intVal = arg.getAsIntegral();
-      llvm::outs() << intVal << '\n';
+      gFlags.eq_      = intVal[0];
+      gFlags.out_     = intVal[1];
+      gFlags.hash_    = intVal[2];
+      gFlags.less_    = intVal[3];
+      gFlags.json_    = intVal[4];
+      gFlags.forEach_ = intVal[5];
     }
   }
 }
 //----------------------------------------------------------------------------
-void Visitor::processRecordField(clang::FieldDecl * decl, FieldInfo & fInfo)
+void Visitor::processRecordField(clang::FieldDecl * decl, FieldInfo & fInfo) const
 {
   fInfo.fieldName_ = decl->getNameAsString();
-  fInfo.fieldType_ = decl->getType().getAsString();
+  fInfo.fieldType_ = decl->getType();
 }
 //----------------------------------------------------------------------------

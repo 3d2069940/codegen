@@ -1,9 +1,10 @@
 //----------------------------------------------------------------------------
-#include "consumer.h"
+#include "consumer.hpp"
 //----------------------------------------------------------------------------
-StructASTConsumer::StructASTConsumer(clang::ASTContext * context, std::shared_ptr<clang::Preprocessor> preProc) :
-  context_(context),
-  visitor_(context, preProc)
+StructASTConsumer::StructASTConsumer(clang::ASTContext * context, clang::StringRef fileName) :
+  visitor_(context),
+  fileName_(fileName),
+  context_(context)
 {
 }
 //----------------------------------------------------------------------------

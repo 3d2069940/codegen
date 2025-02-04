@@ -12,7 +12,7 @@ public:
   StructFrontendAction() = default;
   virtual ~StructFrontendAction() = default;
 
-  virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef fileName) override;
+  virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance & CI, clang::StringRef fileName) override;
 };
 //----------------------------------------------------------------------------
 #endif // StructFrontendActionH

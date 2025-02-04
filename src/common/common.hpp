@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 //----------------------------------------------------------------------------
+#include <clang/AST/Type.h>
+//----------------------------------------------------------------------------
 struct GenFlags
 {
   bool eq_;
@@ -24,8 +26,8 @@ struct GenFlags
 //----------------------------------------------------------------------------
 struct FieldInfo
 {
-  std::string fieldName_;
-  std::string fieldType_;
+  std::string     fieldName_;
+  clang::QualType fieldType_;
 };
 //----------------------------------------------------------------------------
 struct RecordInfo
