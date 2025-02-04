@@ -7,20 +7,24 @@
 #include <clang/Lex/Preprocessor.h>
 //----------------------------------------------------------------------------
 #include "visitor/visitor.hpp"
+#include "generator/generator.hpp"
 //----------------------------------------------------------------------------
 class StructASTConsumer : public clang::ASTConsumer
 {
+//----------------------------------------------------------------------------
 public:
   explicit StructASTConsumer(clang::ASTContext * context, clang::StringRef fileName);
   virtual ~StructASTConsumer() = default;
 
   virtual void HandleTranslationUnit(clang::ASTContext & context) override;
-
+//----------------------------------------------------------------------------
 private:
   Visitor             visitor_;
+  Generator           generator_;
   std::string         fileName_;
   clang::ASTContext * context_;
-};
+//----------------------------------------------------------------------------
+}; // class StructASTConsumer
 //----------------------------------------------------------------------------
 #endif // CONSUMER_HPP
 //----------------------------------------------------------------------------

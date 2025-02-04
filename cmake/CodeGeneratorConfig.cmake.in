@@ -1,0 +1,11 @@
+@PACKAGE_INIT@
+
+find_program(CODEGENERATOR_EXEC CodeGenerator)
+
+include(${CMAKE_CURRENT_LIST_DIR}/generator.cmake)
+
+if(NOT CODEGENERATOR_EXEC)
+  message(FATAL_ERROR "CodeGenerator executable not found. Bruh")
+else()
+  message(STATUS "Found CodeGenerator: ${CODEGENERATOR_EXEC}")
+endif()

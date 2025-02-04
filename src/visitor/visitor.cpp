@@ -23,7 +23,7 @@ bool Visitor::VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl)
     return true;
 
   RecordInfo rInfo;
-  rInfo.type_ = recordDecl->getTypeForDecl()->getTypeClass();
+  rInfo.typeStr_ = recordDecl->getNameAsString();
   
   getQualifiedNameWithTemplates(recordDecl->getDeclContext(), rInfo);
 
@@ -48,13 +48,13 @@ bool Visitor::VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl)
     } 
     declIt++;
   }
-  rInfo_ = rInfo;
+  rInfos_.emplace_back(std::move(rInfo));
   return true;
 }
 //----------------------------------------------------------------------------
-const RecordInfo & Visitor::getRecordInfo() const
+std::vector<RecordInfo> Visitor::getRecordInfos() const
 {
-  return rInfo_;
+  return rInfos_;
 }
 //----------------------------------------------------------------------------
 bool Visitor::checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t & id) const

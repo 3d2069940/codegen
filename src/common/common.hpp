@@ -36,7 +36,7 @@ struct FieldInfo
 //----------------------------------------------------------------------------
 struct RecordInfo
 {
-  clang::Type::TypeClass  type_;
+  std::string             typeStr_;
   std::stack<std::string> qualName_;
   GenFlags                genFlags_;
   std::vector<FieldInfo>  fields_;

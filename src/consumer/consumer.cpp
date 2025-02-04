@@ -13,6 +13,7 @@ void StructASTConsumer::HandleTranslationUnit(clang::ASTContext & context)
   llvm::outs() << "Processing [" << fileName_ << "] now...\n";
   visitor_.TraverseDecl(context.getTranslationUnitDecl());
   llvm::outs() << "Processing done. Now generating stuff\n";
-  const auto & rInfo = visitor_.getRecordInfo();
+  generator_.generate(visitor_.getRecordInfos(), fileName_);
+  llvm::outs() << "Generating for [" << fileName_ << "] is done\n";
 }
 //----------------------------------------------------------------------------

@@ -10,23 +10,14 @@
 int main(int argc, const char ** argv)
 {
   llvm::cl::OptionCategory toolCategory("CodeGen options");
-
-  llvm::cl::opt<bool> enableLogging("logging", 
-                                    llvm::cl::desc("Enable logging"),
-                                    llvm::cl::cat(toolCategory));
-
-  llvm::cl::opt<std::string> logFilePath("log-file-path",
-                                         llvm::cl::desc("Log file path"),
-                                         llvm::cl::cat(toolCategory));
-
-  llvm::cl::opt<bool> useClassKeyword("use-class-keyword-instead-of-typename",
-                                      llvm::cl::desc("Use template<class ...> instead of template<typename ...>"),
-                                      llvm::cl::cat(toolCategory));
+  llvm::cl::opt<std::string> outputFileStr("dir", 
+                                           llvm::cl::desc("Output file. Relative path"), 
+                                           llvm::cl::cat(toolCategory));
 
   auto expectedParser = clang::tooling::CommonOptionsParser::create(argc, argv, toolCategory);
   if (!expectedParser)
   {
-    llvm::errs() << "Couldn't create common options parser. Bruh";
+    llvm::errs() << "Couldn't create common options parser. Bruh\n";
     return 1;
   }
 

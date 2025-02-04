@@ -16,13 +16,13 @@ public:
 //----------------------------------------------------------------------------
   bool VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl);
 
-  const RecordInfo & getRecordInfo() const;
+  std::vector<RecordInfo> getRecordInfos() const;
 //----------------------------------------------------------------------------
 private:
   using decl_iterator = clang::DeclContext::decl_iterator;
 //----------------------------------------------------------------------------
-  clang::ASTContext * context_;
-  RecordInfo          rInfo_;
+  clang::ASTContext     * context_;
+  std::vector<RecordInfo> rInfos_;
 //----------------------------------------------------------------------------
   bool checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t & id) const;
 
@@ -33,7 +33,8 @@ private:
   void processRecordField(clang::FieldDecl * decl, FieldInfo & fInfo) const;
 
   std::string getCXXRecordKindStr(const clang::CXXRecordDecl * decl) const;
-};
+//----------------------------------------------------------------------------
+}; // class Visitor
 //----------------------------------------------------------------------------
 #endif // VISITOR_HPP
 //----------------------------------------------------------------------------

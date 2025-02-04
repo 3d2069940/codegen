@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(CodeGenerator)
+project(CodeGenerator VERSION 0.0.1)
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
@@ -68,6 +68,9 @@ add_executable(${PROJECT_NAME}
   src/consumer/consumer.hpp
   src/consumer/consumer.cpp
 
+  src/generator/generator.hpp
+  src/generator/generator.cpp
+
   src/frontendAction/structFrontendAction.cpp
   src/frontendAction/structFrontendAction.hpp
 )
@@ -90,3 +93,23 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 add_subdirectory(test)
+
+install(TARGETS CodeGenerator
+        RUNTIME DESTINATION bin
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/CodeGeneratorConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/CodeGeneratorConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/CodeGenerator
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/CodeGeneratorConfig.cmake"
+  DESTINATION lib/cmake/CodeGenerator
+)
+install(FILES
+  "${CMAKE_SOURCE_DIR}/cmake/generator.cmake"
+  DESTINATION lib/cmake/CodeGenerator
+)

@@ -1,0 +1,23 @@
+function(codegen_generate TARGET_NAME GENERATED_FILES GENERATED_DIRS)
+  get_target_property(TARGET_SOURCE_FILES ${TARGET_NAME} SOURCES)
+
+  if (NOT TARGET_SOURCE_FILES)
+    message(FATAL_ERROR "Target '${TARGET_NAME}' doesn't exist or has no sources. Bruh")
+  endif()
+
+  foreach(TARGET_SOURCE_FILE ${TARGET_SOURCE_FILES})
+    get_filename_component(TARGET_FILE_NAME    ${TARGET_SOURCE_FILE} NAME)
+    get_filename_component(TARGET_FILE_NAME_WE ${TARGET_SOURCE_FILE} NAME_WE)
+    get_filename_component(TARGET_FILE_EXT     ${TARGET_SOURCE_FILE} EXT)
+
+    file(RELATIVE_PATH TARGET_FILE_RELATIVE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_SOURCE_FILE})
+
+    execute_process(
+      COMMAND           ${CODEGENERATOR_EXEC} --dir=${TARGET_FILE_RELATIVE_PATH} -p ${CMAKE_BINARY_DIR} ${TARGET_SOURCE_FILE}
+      OUTPUT_VARIABLE   ${GENERATED_FILES}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      ERROR_VARIABLE    DUMMY
+    )
+  endforeach()
+
+endfunction()
