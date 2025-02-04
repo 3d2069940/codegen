@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------
-#ifndef ConsumerH
-#define ConsumerH
+#ifndef CONSUMER_HPP
+#define CONSUMER_HPP
 //----------------------------------------------------------------------------
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -18,9 +18,9 @@ public:
 
 private:
   Visitor             visitor_;
-  clang::StringRef    fileName_;
+  std::string         fileName_;
   clang::ASTContext * context_;
 };
 //----------------------------------------------------------------------------
-#endif // ConsumerH
+#endif // CONSUMER_HPP
 //----------------------------------------------------------------------------

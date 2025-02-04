@@ -10,6 +10,9 @@ StructASTConsumer::StructASTConsumer(clang::ASTContext * context, clang::StringR
 //----------------------------------------------------------------------------
 void StructASTConsumer::HandleTranslationUnit(clang::ASTContext & context) 
 {
+  llvm::outs() << "Processing [" << fileName_ << "] now...\n";
   visitor_.TraverseDecl(context.getTranslationUnitDecl());
+  llvm::outs() << "Processing done. Now generating stuff\n";
+  const auto & rInfo = visitor_.getRecordInfo();
 }
 //----------------------------------------------------------------------------

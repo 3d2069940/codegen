@@ -1,4 +1,8 @@
 //----------------------------------------------------------------------------
+#ifndef COMMON_HPP
+#define COMMON_HPP
+//----------------------------------------------------------------------------
+#include <stack>
 #include <vector>
 #include <string>
 //----------------------------------------------------------------------------
@@ -32,7 +36,11 @@ struct FieldInfo
 //----------------------------------------------------------------------------
 struct RecordInfo
 {
-  GenFlags               genFlags_;
-  std::vector<FieldInfo> fields_;
+  clang::Type::TypeClass  type_;
+  std::stack<std::string> qualName_;
+  GenFlags                genFlags_;
+  std::vector<FieldInfo>  fields_;
 };
+//----------------------------------------------------------------------------
+#endif // COMMON_HPP
 //----------------------------------------------------------------------------

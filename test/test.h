@@ -1,4 +1,6 @@
+#include <deque>
 #include <string>
+#include <vector>
 #include <variant>
 #include <optional>
 //----------------------------------------------------------------------------
@@ -34,6 +36,8 @@ struct StructEqHashLess
   gen::Variant<MyVariantType, MyVisitorT> variant_;
   gen::Optional<OptionalStr>              optional_;
 };
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 namespace NamespaceA
 {
@@ -77,4 +81,37 @@ struct EE
 } // namespace NamespaceA
 //----------------------------------------------------------------------------
 } // namespace NamespaceB
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+template<typename Container>
+concept IsAContainer = requires(Container c)
+{
+  { c.begin()  };
+  { c.end()    };
+  { c.cbegin() };
+  { c.cend()   };
+};
+//----------------------------------------------------------------------------
+template<IsAContainer C>
+struct StructWithTemplateSpecialization;
+//----------------------------------------------------------------------------
+template<>
+struct StructWithTemplateSpecialization<std::vector<std::string>>
+{
+  GEN_FLAGS(GEN_FLAG_EQ);
+};
+//----------------------------------------------------------------------------
+template<>
+struct StructWithTemplateSpecialization<std::deque<std::string>>
+{
+  // no gen flags
+};
+//----------------------------------------------------------------------------
+template<typename T, template<typename> typename C>
+  requires IsAContainer<C<T>>
+struct AnotherStruct
+{
+  GEN_FLAGS(GEN_FLAG_OUT);
+};
 //----------------------------------------------------------------------------

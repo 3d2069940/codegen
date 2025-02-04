@@ -1,6 +1,4 @@
 //----------------------------------------------------------------------------
-#include <deque>
-//----------------------------------------------------------------------------
 #include <clang/AST/Comment.h>
 #include <clang/AST/Decl.h>
 #include <clang/AST/Expr.h>
@@ -24,8 +22,11 @@ bool Visitor::VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl)
   if (checkForGenFlags(recordDecl->decls_begin(), recordDecl->decls_end(), genFlagsID) == false)
     return true;
 
-  getQualifiedNameWithTemplates(recordDecl->getDeclContext());
-  RecordInfo    rInfo;
+  RecordInfo rInfo;
+  rInfo.type_ = recordDecl->getTypeForDecl()->getTypeClass();
+  
+  getQualifiedNameWithTemplates(recordDecl->getDeclContext(), rInfo);
+
   decl_iterator declIt = recordDecl->decls_begin();
   for (std::size_t i = 0; ; ++i)
   {
@@ -47,7 +48,13 @@ bool Visitor::VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl)
     } 
     declIt++;
   }
+  rInfo_ = rInfo;
   return true;
+}
+//----------------------------------------------------------------------------
+const RecordInfo & Visitor::getRecordInfo() const
+{
+  return rInfo_;
 }
 //----------------------------------------------------------------------------
 bool Visitor::checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t & id) const
@@ -67,49 +74,51 @@ bool Visitor::checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t
   });
 }
 //----------------------------------------------------------------------------
-void Visitor::getQualifiedNameWithTemplates(clang::DeclContext * context) const
+void Visitor::getQualifiedNameWithTemplates(clang::DeclContext * context, RecordInfo & rInfo) const
 {
   if (context == nullptr)
     return;
 
-  std::deque<std::string> qualifiedName;
   while (context)
   {
     if (clang::isa<clang::NamespaceDecl>(context))
     {
       const auto * namespaceDecl = clang::cast<clang::NamespaceDecl>(context);
-      qualifiedName.push_front(namespaceDecl->getNameAsString());
+      rInfo.qualName_.emplace(std::move(namespaceDecl->getNameAsString()));
     }
     else if (clang::isa<clang::CXXRecordDecl>(context))
     {
-      const auto * cxxRecordDecl = clang::cast<clang::CXXRecordDecl>(context);
-      const auto * templateDecl  = cxxRecordDecl->getDescribedClassTemplate();
-      const auto * templateParams = templateDecl->getTemplateParameters();
-      std::string templateStr = "template<";
-      for (size_t i = 0; i < templateParams->size(); ++i)
-      {
-        if (i > 0)
-          templateStr += ", ";
-        templateStr += templateParams->getParam(i)->getNameAsString();
-      }
-      qualifiedName.push_front(cxxRecordDecl->getNameAsString());
-      qualifiedName.push_front(templateStr + ">");
-    }
-    else if (clang::isa<clang::TemplateDecl>(context))
-    {
-      std::string templateStr;
-      const auto * templateDecl = clang::cast<clang::TemplateDecl>(context);
-      const auto * templateParams = templateDecl->getTemplateParameters();
-      for (size_t i = 0; i < templateParams->size(); ++i)
-      {
-        if (i > 0)
-          templateStr += ", ";
-        templateStr += templateParams->getParam(i)->getNameAsString();
-      }
-      qualifiedName.push_front(templateDecl->getNameAsString());
-      qualifiedName.push_front(templateStr);    
+      const auto * cxxRecordDecl  = clang::cast<clang::CXXRecordDecl>(context);
+      const auto * templateDecl   = cxxRecordDecl->getDescribedClassTemplate();
+      std::string  templateStr    = "template<";
+      std::string  kindAndNameStr = getCXXRecordKindStr(cxxRecordDecl) + " " + cxxRecordDecl->getNameAsString();
+      processTemplateParams(templateDecl->getTemplateParameters(), templateStr);
+      rInfo.qualName_.emplace(std::move(kindAndNameStr));
+      rInfo.qualName_.emplace(std::move(templateStr));
     }
     context = context->getParent();
+  }
+}
+//----------------------------------------------------------------------------
+void Visitor::processTemplateParams(const clang::TemplateParameterList * paramList, std::string & templateStr) const
+{
+  if (paramList == nullptr)
+    return;
+
+  for (const auto * param : *paramList)
+  {
+    if (clang::isa<clang::TemplateTypeParmDecl>(param))
+    {
+      const auto * templateDecl = clang::cast<clang::TemplateTypeParmDecl>(param);
+      templateStr += "typename" + templateDecl->getNameAsString();
+    }
+    else if (clang::isa<clang::TemplateTemplateParmDecl>(param))
+    {
+      const auto * templateTemplateDecl = clang::cast<clang::TemplateTemplateParmDecl>(param);
+      templateStr += "template<";
+      processTemplateParams(templateTemplateDecl->getTemplateParameters(), templateStr);
+      templateStr += "> typename " + templateTemplateDecl->getNameAsString() + ">";
+    }
   }
 }
 //----------------------------------------------------------------------------
@@ -153,5 +162,16 @@ void Visitor::processRecordField(clang::FieldDecl * decl, FieldInfo & fInfo) con
 {
   fInfo.fieldName_ = decl->getNameAsString();
   fInfo.fieldType_ = decl->getType();
+}
+//----------------------------------------------------------------------------
+std::string Visitor::getCXXRecordKindStr(const clang::CXXRecordDecl * decl) const
+{
+  if (decl->isStruct())
+    return "struct";
+  if (decl->isUnion())
+    return "union";
+  if (decl->isClass())
+    return "class";
+  return "";
 }
 //----------------------------------------------------------------------------

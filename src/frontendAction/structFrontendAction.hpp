@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------
-#ifndef StructFrontendActionH
-#define StructFrontendActionH
+#ifndef STRUCT_FRONTEND_ACTION_HPP
+#define STRUCT_FRONTEND_ACTION_HPP
 //----------------------------------------------------------------------------
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -15,5 +15,5 @@ public:
   virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance & CI, clang::StringRef fileName) override;
 };
 //----------------------------------------------------------------------------
-#endif // StructFrontendActionH
+#endif // STRUCT_FRONTEND_ACTION_HPP
 //----------------------------------------------------------------------------
