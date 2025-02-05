@@ -8,6 +8,25 @@
 //----------------------------------------------------------------------------
 #include <clang/AST/Type.h>
 //----------------------------------------------------------------------------
+struct ParserOptions
+{
+  std::string rFilePath_;
+};
+//----------------------------------------------------------------------------
+struct ConsumerOptions
+{
+  clang::ASTContext   * context_;
+  const ParserOptions & pOpts_;
+  std::string           fName_;
+
+  ConsumerOptions(clang::ASTContext * context, clang::StringRef fName, const ParserOptions & pOpts) :
+    context_(context),
+    pOpts_(pOpts),
+    fName_(fName)
+  {
+  }
+};
+//----------------------------------------------------------------------------
 struct GenFlags
 {
   bool eq_;
@@ -34,12 +53,28 @@ struct FieldInfo
   clang::QualType fieldType_;
 };
 //----------------------------------------------------------------------------
+enum class RecordType
+{
+  Struct,
+  Class,
+  Union,
+  Namespace,
+  Unknown
+};
+//----------------------------------------------------------------------------
+struct QualNameInfo
+{
+  RecordType  type_;
+  std::string templateStr_;
+  std::string name_;
+};
+//----------------------------------------------------------------------------
 struct RecordInfo
 {
-  std::string             typeStr_;
-  std::stack<std::string> qualName_;
-  GenFlags                genFlags_;
-  std::vector<FieldInfo>  fields_;
+  std::string              typeStr_;
+  std::stack<QualNameInfo> qualName_;
+  GenFlags                 genFlags_;
+  std::vector<FieldInfo>   fields_;
 };
 //----------------------------------------------------------------------------
 #endif // COMMON_HPP

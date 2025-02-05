@@ -73,6 +73,9 @@ add_executable(${PROJECT_NAME}
 
   src/frontendAction/structFrontendAction.cpp
   src/frontendAction/structFrontendAction.hpp
+
+  src/frontendAction/structFrontendActionFactory.cpp
+  src/frontendAction/structFrontendActionFactory.hpp
 )
 
 target_include_directories(${PROJECT_NAME}

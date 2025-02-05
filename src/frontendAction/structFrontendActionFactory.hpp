@@ -1,26 +1,23 @@
 //----------------------------------------------------------------------------
-#ifndef GENERATOR_HPP
-#define GENERATOR_HPP
+#ifndef STRUCT_FRONTEND_ACTION_FACTORY_HPP
+#define STRUCT_FRONTEND_ACTION_FACTORY_HPP
 //----------------------------------------------------------------------------
-#include <fstream>
+#include <clang/Tooling/Tooling.h>
 //----------------------------------------------------------------------------
 #include "common/common.hpp"
 //----------------------------------------------------------------------------
-class Generator
+class StructFrontendActionFactory : public clang::tooling::FrontendActionFactory
 {
 //----------------------------------------------------------------------------
 public:
-  Generator(const ParserOptions & pOpts);
+  StructFrontendActionFactory(const ParserOptions & pOpts);
 //----------------------------------------------------------------------------
-  void generate(const std::vector<RecordInfo> & rInfos, clang::StringRef fName) const;
+  virtual std::unique_ptr<clang::FrontendAction> create() override;
 //----------------------------------------------------------------------------
 private:
   const ParserOptions & pOpts_;
 //----------------------------------------------------------------------------
-  void generateCpp(const RecordInfo & rInfo, std::ofstream & f) const;
-  void generateHeader(const RecordInfo & rInfo, std::ofstream & f) const;
+}; // class StructFrontendActionFactory
 //----------------------------------------------------------------------------
-}; // class Generator
-//----------------------------------------------------------------------------
-#endif // GENERATOR_HPP
+#endif // STRUCT_FRONTEND_ACTION_FACTORY_HPP
 //----------------------------------------------------------------------------

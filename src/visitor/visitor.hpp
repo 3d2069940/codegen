@@ -11,7 +11,7 @@ class Visitor : public clang::RecursiveASTVisitor<Visitor>
 {
 //----------------------------------------------------------------------------
 public:
-  explicit Visitor(clang::ASTContext * context);
+  explicit Visitor(clang::ASTContext * context, const ParserOptions & pOpts);
   virtual ~Visitor() = default;
 //----------------------------------------------------------------------------
   bool VisitCXXRecordDecl(clang::CXXRecordDecl * recordDecl);
@@ -23,6 +23,7 @@ private:
 //----------------------------------------------------------------------------
   clang::ASTContext     * context_;
   std::vector<RecordInfo> rInfos_;
+  const ParserOptions   & pOpts_; 
 //----------------------------------------------------------------------------
   bool checkForGenFlags(decl_iterator beg, decl_iterator end, std::size_t & id) const;
 
@@ -32,7 +33,7 @@ private:
   void processGenFlags(clang::VarDecl * decl, GenFlags & gFlags) const;
   void processRecordField(clang::FieldDecl * decl, FieldInfo & fInfo) const;
 
-  std::string getCXXRecordKindStr(const clang::CXXRecordDecl * decl) const;
+  RecordType getCXXRecordType(const clang::CXXRecordDecl * decl) const;
 //----------------------------------------------------------------------------
 }; // class Visitor
 //----------------------------------------------------------------------------

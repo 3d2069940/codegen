@@ -8,21 +8,21 @@
 //----------------------------------------------------------------------------
 #include "visitor/visitor.hpp"
 #include "generator/generator.hpp"
+#include "common/common.hpp"
 //----------------------------------------------------------------------------
 class StructASTConsumer : public clang::ASTConsumer
 {
 //----------------------------------------------------------------------------
 public:
-  explicit StructASTConsumer(clang::ASTContext * context, clang::StringRef fileName);
+  StructASTConsumer(ConsumerOptions opts);
   virtual ~StructASTConsumer() = default;
 
   virtual void HandleTranslationUnit(clang::ASTContext & context) override;
 //----------------------------------------------------------------------------
 private:
-  Visitor             visitor_;
-  Generator           generator_;
-  std::string         fileName_;
-  clang::ASTContext * context_;
+  ConsumerOptions opts_;
+  Visitor         visitor_;
+  Generator       generator_;
 //----------------------------------------------------------------------------
 }; // class StructASTConsumer
 //----------------------------------------------------------------------------
